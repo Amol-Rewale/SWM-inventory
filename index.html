@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart WMS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <span class="logo-icon">⬡</span>
+      <span class="logo-text">SMART<strong>WMS</strong></span>
+    </div>
+    <div class="header-meta">
+      <span class="badge live">● LIVE</span>
+      <span class="header-date" id="headerDate"></span>
+    </div>
+  </div>
+</header>
+
+<!-- Action Tabs -->
+<div class="tabs-wrapper">
+  <div class="tabs">
+    <button class="tab-btn" onclick="openModal('addModal')">
+      <span class="tab-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>
+      </span>
+      <span class="tab-label">Add Product</span>
+    </button>
+    <button class="tab-btn" onclick="openModal('dispatchModal')">
+      <span class="tab-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </span>
+      <span class="tab-label">Dispatch</span>
+    </button>
+    <button class="tab-btn" onclick="openModal('searchModal')">
+      <span class="tab-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+      </span>
+      <span class="tab-label">Search Location</span>
+    </button>
+    <button class="tab-btn" onclick="openModal('setLocModal')">
+      <span class="tab-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+      </span>
+      <span class="tab-label">Set Location</span>
+    </button>
+  </div>
+</div>
+
+<!-- Stats Bar -->
+<div class="stats-bar">
+  <div class="stat-card">
+    <span class="stat-val" id="statTotal">—</span>
+    <span class="stat-label">Total SKUs</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-val" id="statQty">—</span>
+    <span class="stat-label">Total Stock</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-val" id="statOrders">—</span>
+    <span class="stat-label">Orders</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-val" id="statValue">—</span>
+    <span class="stat-label">Inventory Value</span>
+  </div>
+</div>
+
+<!-- Main Panels -->
+<div class="panels">
+
+  <!-- Inventory Panel -->
+  <div class="panel">
+    <div class="panel-header">
+      <h2>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        Inventory
+      </h2>
+      <button class="refresh-btn" onclick="loadInventory()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+      </button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>SKU</th>
+            <th>Product Name</th>
+            <th>Qty</th>
+            <th>Price</th>
+          </tr>
+        </thead>
+        <tbody id="inventory"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Orders Panel -->
+  <div class="panel">
+    <div class="panel-header">
+      <h2>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        Orders
+      </h2>
+      <button class="refresh-btn" onclick="loadOrders()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+      </button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Customer</th>
+            <th>Date</th>
+            <th>SKU</th>
+            <th>Product</th>
+            <th>Price</th>
+            <th>Qty</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody id="order"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== MODALS ===== -->
+
+<!-- Add Product Modal -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-icon add-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+      </div>
+      <div>
+        <h3>Add Product</h3>
+        <p>Add new stock to inventory</p>
+      </div>
+      <button class="close-btn" onclick="closeModal('addModal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label>SKU *</label>
+          <input id="sku" placeholder="e.g. SKU-001">
+        </div>
+        <div class="form-group">
+          <label>Product Name *</label>
+          <input id="name" placeholder="e.g. Wireless Mouse">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Quantity *</label>
+          <input id="qty" type="number" placeholder="e.g. 100">
+        </div>
+        <div class="form-group">
+          <label>Price *</label>
+          <input id="price" type="number" placeholder="e.g. 499.00">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('addModal')">Cancel</button>
+      <button class="btn-primary" onclick="addProduct()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        Add to Stock
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Dispatch Modal -->
+<div class="modal-overlay" id="dispatchModal">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <div class="modal-icon dispatch-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </div>
+      <div>
+        <h3>Dispatch Product</h3>
+        <p>Outbound stock dispatch</p>
+      </div>
+      <button class="close-btn" onclick="closeModal('dispatchModal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>SKU *</label>
+        <input id="outSku" placeholder="Enter SKU to dispatch">
+      </div>
+      <div class="form-group">
+        <label>Quantity *</label>
+        <input id="outQty" type="number" placeholder="Quantity to dispatch">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('dispatchModal')">Cancel</button>
+      <button class="btn-danger" onclick="dispatchProduct()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        Dispatch Now
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Search Location Modal -->
+<div class="modal-overlay" id="searchModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-icon search-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+      </div>
+      <div>
+        <h3>Search Location</h3>
+        <p>Find product in warehouse</p>
+      </div>
+      <button class="close-btn" onclick="closeModal('searchModal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="search-input-row">
+        <div class="form-group" style="flex:1">
+          <label>SKU</label>
+          <input id="searchSku" placeholder="Enter SKU..." onkeypress="if(event.key==='Enter'){searchLocation()}">
+        </div>
+        <button class="btn-primary search-go" onclick="searchLocation()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+          Search
+        </button>
+      </div>
+      <div class="table-wrap" style="margin-top:16px;">
+        <table>
+          <thead>
+            <tr>
+              <th>SKU</th>
+              <th>Bin</th>
+              <th>Rack</th>
+              <th>Column</th>
+              <th>Row</th>
+            </tr>
+          </thead>
+          <tbody id="locationTable">
+            <tr><td colspan="5" class="empty-row">Enter a SKU to search</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Set Location Modal -->
+<div class="modal-overlay" id="setLocModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-icon loc-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+      </div>
+      <div>
+        <h3>Set Location</h3>
+        <p>Assign warehouse position</p>
+      </div>
+      <button class="close-btn" onclick="closeModal('setLocModal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label>SKU *</label>
+          <input id="locSku" placeholder="Product SKU">
+        </div>
+        <div class="form-group">
+          <label>Bin *</label>
+          <input id="locBim" placeholder="Bin ID">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Rack No *</label>
+          <input id="locRack" placeholder="Rack Number">
+        </div>
+        <div class="form-group">
+          <label>Column *</label>
+          <input id="locColumn" placeholder="Column">
+        </div>
+        <div class="form-group">
+          <label>Row *</label>
+          <input id="locRow" placeholder="Row">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('setLocModal')">Cancel</button>
+      <button class="btn-primary" onclick="setLocation()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+        Save Location
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Product Detail Modal -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal modal-md">
+    <div class="modal-header">
+      <div class="modal-icon detail-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+      </div>
+      <div>
+        <h3>Product Details</h3>
+        <p id="detailSku" style="font-family:'Space Mono',monospace;font-size:12px;color:var(--accent)"></p>
+      </div>
+      <button class="close-btn" onclick="closeModal('detailModal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <!-- Read-only info row -->
+      <div class="detail-info-row">
+        <div class="detail-item">
+          <span class="detail-label">SKU</span>
+          <span class="detail-val mono" id="d_sku">—</span>
+        </div>
+        <div class="detail-item" style="flex:2">
+          <span class="detail-label">Product Name</span>
+          <span class="detail-val" id="d_name">—</span>
+        </div>
+      </div>
+      <!-- Divider -->
+      <div class="detail-divider">
+        <span>Update Stock Details</span>
+      </div>
+      <!-- Editable fields -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;vertical-align:middle;margin-right:4px"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+            New Quantity
+          </label>
+          <input id="edit_qty" type="number" placeholder="Enter updated quantity" min="0">
+          <span class="field-hint">Current: <span id="hint_qty">—</span> units</span>
+        </div>
+        <div class="form-group">
+          <label>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;vertical-align:middle;margin-right:4px"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+            New Price (₹)
+          </label>
+          <input id="edit_price" type="number" placeholder="Enter updated price" min="0" step="0.01">
+          <span class="field-hint">Current: ₹<span id="hint_price">—</span></span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('detailModal')">Close</button>
+      <button class="btn-warning" onclick="prefillDispatch()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        Quick Dispatch
+      </button>
+      <button class="btn-primary" onclick="updateProduct()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+        Update Product
+      </button>
+      <button class="btn-delete" onclick="deleteProduct()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="3 6 5 6 21 6"/>
+          <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+          <path d="M10 11v6M14 11v6"/>
+          <path d="M9 6V4h6v2"/>
+        </svg>
+        Delete
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="toast" id="toast"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
